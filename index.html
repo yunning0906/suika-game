@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Suika Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="game-wrapper">
+        <!-- Left Side Panel: Strictly specified items only -->
+        <aside class="side-panel">
+            <!-- 1. 遊戲的名稱 -->
+            <h1 class="brand-title">Suika Game</h1>
+
+            <!-- 2. 現在得的分數 -->
+            <div class="stat-box" id="scoreCard">
+                <div class="stat-label">現在得分</div>
+                <div class="stat-value" id="currentScore">0</div>
+            </div>
+
+            <!-- 3. 最高的紀錄 -->
+            <div class="stat-box high-score" id="highScoreCard">
+                <div class="stat-label">最高紀錄</div>
+                <div class="stat-value" id="highScore">0</div>
+            </div>
+
+            <!-- Next Fruit Preview (Canvas only, no text) -->
+            <div class="next-fruit-card">
+                <canvas id="nextFruitCanvas" class="next-fruit-canvas" width="85" height="85"></canvas>
+            </div>
+
+            <!-- 4. 重新開始 -->
+            <div class="controls-group">
+                <button class="btn btn-primary" id="restartBtn">重新開始</button>
+            </div>
+        </aside>
+
+        <!-- Center Game Box & Bottom Evolution Canvas -->
+        <section class="game-center">
+            <!-- Canvas Viewport -->
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="440" height="680"></canvas>
+            </div>
+
+            <!-- Bottom Horizontal Evolution Bar (Pure Hand-Drawn Colored Pencil Canvas, No Text) -->
+            <div class="bottom-evolution-bar">
+                <canvas id="evolutionCanvas" width="440" height="50"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <!-- Game Over Modal -->
+    <div class="modal-overlay hidden" id="gameOverModal">
+        <div class="modal-box">
+            <div class="modal-score-cards">
+                <div class="stat-box">
+                    <div class="stat-label">現在得分</div>
+                    <div class="stat-value" id="finalScore">0</div>
+                </div>
+                <div class="stat-box high-score">
+                    <div class="stat-label">最高紀錄</div>
+                    <div class="stat-value" id="bestScoreModal">0</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="modalRestartBtn" style="width: 100%; font-size: 18px; padding: 12px;">
+                重新開始
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="libs/matter.min.js"></script>
+    <script src="js/fruits.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

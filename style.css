@@ -1,0 +1,320 @@
+:root {
+    /* Notebook Grid & Beige Palette */
+    --paper-bg: #F7F3E9;
+    --paper-grid: rgba(185, 168, 145, 0.22);
+    --paper-card: #FFFEFA;
+    
+    --text-black: #000000;
+    --pencil-border: #524338;
+    
+    --sketch-border: 2.2px solid var(--pencil-border);
+    --sketch-shadow: 4px 4px 0px rgba(82, 67, 56, 0.16);
+    --sketch-shadow-hover: 6px 6px 0px rgba(82, 67, 56, 0.2);
+    
+    --font-main: 'Microsoft JhengHei', '微軟正黑體', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--paper-bg);
+    /* Notebook Graph Paper Light Grid */
+    background-image: 
+        linear-gradient(to right, var(--paper-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--paper-grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-black);
+    overflow-x: hidden;
+    padding: 16px;
+}
+
+/* Main Layout Wrapper */
+.game-wrapper {
+    position: relative;
+    display: flex;
+    gap: 22px;
+    max-width: 800px;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+/* Left Side Panel: Clean Rounded Rectangle (圓弧長方形，同右邊畫布) */
+.side-panel {
+    background: var(--paper-card);
+    border: var(--sketch-border);
+    border-radius: 24px; /* 與右邊相同圓角 */
+    padding: 22px;
+    box-shadow: var(--sketch-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 240px;
+}
+
+/* 1. 遊戲名稱：黑色 */
+.brand-title {
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-black);
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+
+/* Stat Cards (Rounded Rectangles) */
+.stat-box {
+    background: #FFFDF8;
+    border: 2px solid var(--pencil-border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    text-align: center;
+    box-shadow: 3px 3px 0px rgba(82, 67, 56, 0.12);
+    transition: transform 0.2s ease;
+}
+
+.stat-box.high-score {
+    background: #FFFDF8;
+    border-color: var(--pencil-border);
+}
+
+/* 全部字改為黑色 */
+.stat-label {
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-black);
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-family: var(--font-main);
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-black);
+    line-height: 1.1;
+}
+
+.stat-box.high-score .stat-value {
+    color: var(--text-black);
+}
+
+/* Next Fruit Preview Card */
+.next-fruit-card {
+    background: #F8FAF6;
+    border: 2px solid var(--pencil-border);
+    border-radius: 16px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 3px 3px 0px rgba(82, 67, 56, 0.12);
+}
+
+.next-fruit-canvas {
+    width: 85px;
+    height: 85px;
+    display: block;
+}
+
+/* Controls Group */
+.controls-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 重新開始按鈕：保留特色顏色 */
+.btn {
+    font-family: var(--font-main);
+    font-size: 17px;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 2px solid var(--pencil-border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--sketch-shadow);
+    transition: all 0.15s ease;
+    background: #FFE8EC;
+    color: #D63031;
+}
+
+.btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--sketch-shadow-hover);
+    background: #FFD4DC;
+}
+
+.btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px rgba(82, 67, 56, 0.2);
+}
+
+/* Center Game Area */
+.game-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.canvas-container {
+    background-color: #FFFDF9;
+    /* Notebook Grid inside Game Canvas */
+    background-image: 
+        linear-gradient(to right, rgba(185, 168, 145, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(185, 168, 145, 0.14) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border: var(--sketch-border);
+    border-radius: 24px;
+    box-shadow: var(--sketch-shadow);
+    position: relative;
+    overflow: hidden;
+    width: 440px;
+    height: 680px;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* Bottom Horizontal Evolution Bar (Single Row Canvas) */
+.bottom-evolution-bar {
+    margin-top: 14px;
+    width: 100%;
+    background: #FFFEFA;
+    border: 2px solid var(--pencil-border);
+    border-radius: 16px;
+    padding: 6px 8px;
+    box-shadow: var(--sketch-shadow);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#evolutionCanvas {
+    display: block;
+    width: 100%;
+    height: 50px;
+}
+
+/* Game Over Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+    padding: 20px;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-box {
+    background: #FFFDF9;
+    border-radius: 24px;
+    padding: 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.2);
+    border: 3px solid var(--pencil-border);
+}
+
+.modal-score-cards {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.modal-score-cards .stat-box {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 780px) {
+    .game-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-panel {
+        width: 440px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .side-panel .stat-box,
+    .side-panel .next-fruit-card {
+        flex: 1;
+        min-width: 110px;
+    }
+
+    .side-panel .controls-group {
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .side-panel .controls-group .btn {
+        flex: 1;
+    }
+
+    .bottom-evolution-bar {
+        width: 440px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .canvas-container {
+        width: 100vw;
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 180px);
+        border-radius: 18px;
+    }
+
+    .side-panel {
+        width: 100%;
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .bottom-evolution-bar {
+        width: 100vw;
+        max-width: calc(100vw - 16px);
+    }
+}
