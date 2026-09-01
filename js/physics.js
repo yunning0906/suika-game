@@ -1,6 +1,6 @@
 /**
  * Physics Engine & Fruit Collision / Merge Logic using Matter.js
- * High-performance configuration (enableSleeping: true, zero memory leaks, fast steady framerate).
+ * Clean colored-pencil style, zero audio, 100% active gravity (zero mid-air freezing).
  */
 
 class PhysicsWorld {
@@ -31,7 +31,8 @@ class PhysicsWorld {
         const { Engine, World, Bodies, Events } = Matter;
 
         this.engine = Engine.create({
-            enableSleeping: true, // Crucial: lets settled bottom fruits sleep, keeping 60 FPS even with 40+ fruits!
+            // CRITICAL FIX: enableSleeping MUST be false so fruits never freeze mid-air!
+            enableSleeping: false,
             positionIterations: 6,
             velocityIterations: 4,
             gravity: { x: 0, y: 2.8, scale: 0.0012 }
@@ -53,7 +54,7 @@ class PhysicsWorld {
             this.height / 2,
             wallThickness,
             this.height * 2,
-            { isStatic: true, friction: 0.3, restitution: 0.2 }
+            { isStatic: true, friction: 0.2, restitution: 0.2 }
         );
 
         const rightWall = Bodies.rectangle(
@@ -61,36 +62,25 @@ class PhysicsWorld {
             this.height / 2,
             wallThickness,
             this.height * 2,
-            { isStatic: true, friction: 0.3, restitution: 0.2 }
+            { isStatic: true, friction: 0.2, restitution: 0.2 }
         );
 
-        const cornerSize = 40;
-        const leftCorner = Bodies.fromVertices(
-            20,
-            this.height - 20,
-            [
-                { x: 0, y: this.height },
-                { x: cornerSize, y: this.height },
-                { x: 0, y: this.height - cornerSize }
-            ],
-            { isStatic: true, friction: 0.5, restitution: 0.3 }
-        );
+        // Simple, clean chamfer blocks at bottom corners to prevent dead-corner sticking
+        const leftChamfer = Bodies.rectangle(15, this.height - 15, 50, 20, {
+            isStatic: true,
+            angle: Math.PI / 4,
+            friction: 0.3,
+            restitution: 0.2
+        });
 
-        const rightCorner = Bodies.fromVertices(
-            this.width - 20,
-            this.height - 20,
-            [
-                { x: this.width, y: this.height },
-                { x: this.width - cornerSize, y: this.height },
-                { x: this.width, y: this.height - cornerSize }
-            ],
-            { isStatic: true, friction: 0.5, restitution: 0.3 }
-        );
+        const rightChamfer = Bodies.rectangle(this.width - 15, this.height - 15, 50, 20, {
+            isStatic: true,
+            angle: -Math.PI / 4,
+            friction: 0.3,
+            restitution: 0.2
+        });
 
-        World.add(this.world, [ground, leftWall, rightWall]);
-        if (leftCorner && rightCorner) {
-            World.add(this.world, [leftCorner, rightCorner]);
-        }
+        World.add(this.world, [ground, leftWall, rightWall, leftChamfer, rightChamfer]);
 
         Events.on(this.engine, 'collisionStart', (event) => {
             const pairs = event.pairs;
@@ -106,10 +96,10 @@ class PhysicsWorld {
         const { Bodies, World } = Matter;
 
         const body = Bodies.circle(x, y, config.radius, {
-            restitution: 0.2,
-            friction: 0.35,
-            frictionAir: 0.002,
-            density: 0.0018 * (1 + tier * 0.08),
+            restitution: 0.18,
+            friction: 0.3,
+            frictionAir: 0.001, // Extremely low air friction for smooth downward fall
+            density: 0.002 * (1 + tier * 0.08),
             isStatic: isStatic,
             label: 'fruit'
         });
@@ -176,19 +166,27 @@ class PhysicsWorld {
             const midX = (bodyA.position.x + bodyB.position.x) / 2;
             const midY = (bodyA.position.y + bodyB.position.y) / 2;
 
+            // Remove merged fruits from world
             World.remove(this.world, bodyA);
             World.remove(this.world, bodyB);
 
             this.fruits = this.fruits.filter((f) => f !== bodyA && f !== bodyB);
 
+            // Spawn upgraded fruit at midpoint
             const newFruit = this.createFruit(midX, midY, nextTier);
             newFruit.scaleX = 1.35;
             newFruit.scaleY = 0.75;
 
+            // Gentle pop impulse
             Matter.Body.setVelocity(newFruit, {
-                x: (Math.random() - 0.5) * 1.5,
-                y: -3.0
+                x: (Math.random() - 0.5) * 1.2,
+                y: -2.0
             });
+
+            // Wake up and ensure all remaining fruits stay dynamic
+            for (let i = 0; i < this.fruits.length; i++) {
+                this.fruits[i].isSleeping = false;
+            }
 
             const fruitConfig = FRUIT_TIERS[nextTier];
             const baseScore = fruitConfig.score;
@@ -214,19 +212,22 @@ class PhysicsWorld {
         Matter.Engine.update(this.engine, 1000 / 60);
         this.processMerges();
 
-        for (let i = 0; i < this.fruits.length; i++) {
-            const fruit = this.fruits[i];
-            if (fruit.scaleX !== fruit.targetScaleX || fruit.scaleY !== fruit.targetScaleY) {
-                fruit.scaleX += (fruit.targetScaleX - fruit.scaleX) * 0.18;
-                fruit.scaleY += (fruit.targetScaleY - fruit.scaleY) * 0.18;
-            }
-        }
-
         const now = Date.now();
         let exceedingFruitCount = 0;
 
         for (let i = 0; i < this.fruits.length; i++) {
             const fruit = this.fruits[i];
+
+            // Anti-freeze watchdog: Ensure fruits never stay asleep or stuck in mid-air
+            fruit.isSleeping = false;
+
+            // Squash & stretch recovery
+            if (fruit.scaleX !== fruit.targetScaleX || fruit.scaleY !== fruit.targetScaleY) {
+                fruit.scaleX += (fruit.targetScaleX - fruit.scaleX) * 0.18;
+                fruit.scaleY += (fruit.targetScaleY - fruit.scaleY) * 0.18;
+            }
+
+            // Danger line check
             if (now - fruit.dropTime > 1200) {
                 const config = FRUIT_TIERS[fruit.tier];
                 const topEdge = fruit.position.y - config.radius;

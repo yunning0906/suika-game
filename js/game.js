@@ -1,5 +1,5 @@
 /**
- * Main Suika Game Orchestrator (High Performance 60 FPS, Touch/Mouse Only)
+ * Main Suika Game Orchestrator (Smooth Drop, Anti-Freeze, Touch/Mouse Only)
  */
 
 class SuikaGame {
@@ -16,11 +16,11 @@ class SuikaGame {
         this.isGameOver = false;
         this.isPaused = false;
         this.canDrop = true;
-        this.dropCooldown = 400;
+        this.dropCooldown = 420;
 
         this.dropperX = this.canvas.width / 2;
         this.targetDropperX = this.canvas.width / 2;
-        this.dropperY = 50;
+        this.dropperY = 52;
 
         this.currentTier = this.getRandomDropTier();
         this.nextTier = this.getRandomDropTier();
@@ -107,18 +107,24 @@ class SuikaGame {
         }
     }
 
+    getSpawnY() {
+        const curConfig = FRUIT_TIERS[this.currentTier];
+        return Math.max(curConfig.radius + 10, this.dropperY);
+    }
+
     dropFruit() {
         if (!this.canDrop || this.isGameOver || this.isPaused) return;
 
         this.canDrop = false;
 
         const spawnX = this.dropperX;
-        const spawnY = this.dropperY;
+        const spawnY = this.getSpawnY();
 
         const fruitBody = this.physics.createFruit(spawnX, spawnY, this.currentTier);
         fruitBody.scaleX = 0.88;
         fruitBody.scaleY = 1.15;
 
+        // Downward velocity for immediate snappy fall
         Matter.Body.setVelocity(fruitBody, { x: 0, y: 5.5 });
 
         this.currentTier = this.nextTier;
@@ -284,12 +290,15 @@ class SuikaGame {
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // 1. Physics Fruits & Danger Line
         this.physics.draw(ctx);
 
+        // 2. Particles & Popups
         if (window.particleSystem) {
             window.particleSystem.draw(ctx);
         }
 
+        // 3. Hanging Fruit & Guide Line
         if (!this.isGameOver) {
             this.drawDropper(ctx);
         }
@@ -297,7 +306,7 @@ class SuikaGame {
 
     drawDropper(ctx) {
         const x = this.dropperX;
-        const y = this.dropperY;
+        const y = this.getSpawnY();
         const curConfig = FRUIT_TIERS[this.currentTier];
 
         ctx.save();
