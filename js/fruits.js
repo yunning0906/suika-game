@@ -1,12 +1,12 @@
 /**
  * Colored Pencil (色鉛筆手繪風) Fruit Definitions & Dynamic Vector Renderer
- * High-performance rendering (zero GC gradient thrashing), solid black dot eyes, matte colored pencil texture.
+ * Clean minimalist aesthetic: No strawberry seeds, no blush, smaller cute black dot eyes.
  */
 
 const FRUIT_TIERS = [
     {
         tier: 0,
-        name: '櫻桃',
+        name: 'Cherry',
         radius: 17,
         score: 2,
         color: '#FF6B7A',
@@ -16,7 +16,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 1,
-        name: '草莓',
+        name: 'Strawberry',
         radius: 25,
         score: 4,
         color: '#FF5E6C',
@@ -27,7 +27,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 2,
-        name: '葡萄',
+        name: 'Grape',
         radius: 33,
         score: 8,
         color: '#A57BC9',
@@ -38,7 +38,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 3,
-        name: '凸頂柑',
+        name: 'Dekopon',
         radius: 42,
         score: 16,
         color: '#FFA74F',
@@ -49,7 +49,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 4,
-        name: '紅柿子',
+        name: 'Persimmon',
         radius: 52,
         score: 32,
         color: '#FF7657',
@@ -60,7 +60,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 5,
-        name: '紅蘋果',
+        name: 'Apple',
         radius: 63,
         score: 64,
         color: '#EE5A5A',
@@ -72,7 +72,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 6,
-        name: '香梨',
+        name: 'Pear',
         radius: 74,
         score: 128,
         color: '#C6E377',
@@ -84,7 +84,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 7,
-        name: '水蜜桃',
+        name: 'Peach',
         radius: 86,
         score: 256,
         color: '#FFB2C9',
@@ -95,7 +95,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 8,
-        name: '鳳梨',
+        name: 'Pineapple',
         radius: 98,
         score: 512,
         color: '#FCD858',
@@ -106,7 +106,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 9,
-        name: '哈密瓜',
+        name: 'Melon',
         radius: 110,
         score: 1024,
         color: '#9EE6A8',
@@ -117,7 +117,7 @@ const FRUIT_TIERS = [
     },
     {
         tier: 10,
-        name: '大西瓜',
+        name: 'Watermelon',
         radius: 124,
         score: 2048,
         color: '#65D38A',
@@ -138,7 +138,7 @@ class FruitRenderer {
     }
 
     /**
-     * Draw fruit in colored pencil style (Optimized, solid black dot eyes, matte texture)
+     * Draw fruit in colored pencil style
      */
     drawFruit(ctx, fruitBody, previewMode = false) {
         const tier = fruitBody.tier !== undefined ? fruitBody.tier : 0;
@@ -170,20 +170,19 @@ class FruitRenderer {
         ctx.rotate(angle);
         ctx.scale(scaleX, scaleY);
 
-        // 1. Base Colored-Pencil Body (Fast fill, zero GC overhead)
+        // 1. Base Colored-Pencil Body
         this.drawPencilBody(ctx, config, radius);
 
-        // 2. Fruit Features (Leaves, Stems, Stripes, Textures)
+        // 2. Fruit Features (Leaves, Stems, Stripes)
         this.drawPencilFeatures(ctx, config, radius);
 
-        // 3. Hand-Drawn Face with Solid Black Dot Eyes
+        // 3. Face: Smaller black dot eyes, no blush
         this.drawMatteFace(ctx, config, radius, fruitBody.isBlinking, tier);
 
         ctx.restore();
     }
 
     drawPencilBody(ctx, config, r) {
-        // Direct solid fill with colored pencil tone
         ctx.fillStyle = config.color;
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -249,7 +248,7 @@ class FruitRenderer {
                 ctx.restore();
                 break;
 
-            case 1: // 🍓 Strawberry (Small delicate leaves)
+            case 1: // 🍓 Strawberry (草變小，點點已刪除)
                 ctx.save();
                 ctx.fillStyle = '#81C784';
                 ctx.strokeStyle = outlineColor;
@@ -257,19 +256,6 @@ class FruitRenderer {
                 for (let i = -1; i <= 1; i++) {
                     ctx.beginPath();
                     ctx.ellipse(i * (r * 0.22), -r * 0.95, r * 0.09, r * 0.14, (i * Math.PI) / 10, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                }
-                ctx.fillStyle = '#FFF176';
-                ctx.strokeStyle = '#5A3D31';
-                ctx.lineWidth = 0.8;
-                const seeds = [
-                    { x: -r * 0.35, y: -r * 0.15 }, { x: r * 0.35, y: -r * 0.15 },
-                    { x: -r * 0.42, y: r * 0.3 }, { x: 0, y: r * 0.45 }, { x: r * 0.42, y: r * 0.3 }
-                ];
-                for (const s of seeds) {
-                    ctx.beginPath();
-                    ctx.ellipse(s.x, s.y, r * 0.045, r * 0.07, 0, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                 }
@@ -478,30 +464,22 @@ class FruitRenderer {
     }
 
     /**
-     * Draw Face with Solid Black Dot Eyes (黑黑一點，無反光)
+     * Draw Face: Smaller solid black dot eyes, NO blush (完全刪除腮紅，眼睛更小巧)
      */
     drawMatteFace(ctx, config, r, isBlinking, tier) {
         ctx.save();
         const eyeOffsetX = r * 0.32;
-        const eyeOffsetY = r * 0.05;
-        const eyeRadius = Math.max(2.4, r * 0.08);
+        const eyeOffsetY = r * 0.06;
+        // Smaller delicate eyes: scaled down
+        const eyeRadius = Math.max(1.6, r * 0.052);
         const pencilLead = '#222222';
 
-        // 1. Soft Crayon Blush Cheeks
-        ctx.fillStyle = tier >= 7 ? 'rgba(255, 120, 145, 0.55)' : 'rgba(255, 140, 160, 0.45)';
-        const blushOffsetX = r * 0.48;
-        const blushOffsetY = r * 0.18;
-        const blushRadius = Math.max(3.0, r * 0.12);
+        // 1. NO BLUSH (已刪除腮紅)
 
-        ctx.beginPath();
-        ctx.ellipse(-blushOffsetX, blushOffsetY, blushRadius, blushRadius * 0.65, 0, 0, Math.PI * 2);
-        ctx.ellipse(blushOffsetX, blushOffsetY, blushRadius, blushRadius * 0.65, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 2. Eyes: Solid Black Dots
+        // 2. Eyes: Smaller Solid Black Dots
         if (isBlinking) {
             ctx.strokeStyle = pencilLead;
-            ctx.lineWidth = Math.max(2.0, r * 0.06);
+            ctx.lineWidth = Math.max(1.5, r * 0.045);
             ctx.lineCap = 'round';
 
             ctx.beginPath();
@@ -518,18 +496,18 @@ class FruitRenderer {
 
         // 3. Cute Hand-drawn Smile
         ctx.strokeStyle = pencilLead;
-        ctx.lineWidth = Math.max(1.8, r * 0.055);
+        ctx.lineWidth = Math.max(1.6, r * 0.048);
         ctx.lineCap = 'round';
 
         if (tier >= 8) {
             ctx.fillStyle = '#FF7582';
             ctx.beginPath();
-            ctx.arc(0, eyeOffsetY + r * 0.14, r * 0.15, 0, Math.PI);
+            ctx.arc(0, eyeOffsetY + r * 0.13, r * 0.13, 0, Math.PI);
             ctx.fill();
             ctx.stroke();
         } else {
             ctx.beginPath();
-            ctx.arc(0, eyeOffsetY + r * 0.12, r * 0.11, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.arc(0, eyeOffsetY + r * 0.11, r * 0.1, 0.15 * Math.PI, 0.85 * Math.PI);
             ctx.stroke();
         }
 
