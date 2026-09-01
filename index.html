@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,20 +8,20 @@
 </head>
 <body>
     <main class="game-wrapper">
-        <!-- Left Side Panel: Strictly specified items only -->
+        <!-- Left Side Panel: English Minimal UI -->
         <aside class="side-panel">
-            <!-- 1. 遊戲的名稱 -->
+            <!-- 1. Game Title -->
             <h1 class="brand-title">Suika Game</h1>
 
-            <!-- 2. 現在得的分數 -->
+            <!-- 2. Current Score -->
             <div class="stat-box" id="scoreCard">
-                <div class="stat-label">現在得分</div>
+                <div class="stat-label">SCORE</div>
                 <div class="stat-value" id="currentScore">0</div>
             </div>
 
-            <!-- 3. 最高的紀錄 -->
+            <!-- 3. High Score -->
             <div class="stat-box high-score" id="highScoreCard">
-                <div class="stat-label">最高紀錄</div>
+                <div class="stat-label">BEST</div>
                 <div class="stat-value" id="highScore">0</div>
             </div>
 
@@ -30,9 +30,9 @@
                 <canvas id="nextFruitCanvas" class="next-fruit-canvas" width="85" height="85"></canvas>
             </div>
 
-            <!-- 4. 重新開始 -->
+            <!-- 4. Restart Button -->
             <div class="controls-group">
-                <button class="btn btn-primary" id="restartBtn">重新開始</button>
+                <button class="btn btn-primary" id="restartBtn">RESTART</button>
             </div>
         </aside>
 
@@ -55,16 +55,16 @@
         <div class="modal-box">
             <div class="modal-score-cards">
                 <div class="stat-box">
-                    <div class="stat-label">現在得分</div>
+                    <div class="stat-label">SCORE</div>
                     <div class="stat-value" id="finalScore">0</div>
                 </div>
                 <div class="stat-box high-score">
-                    <div class="stat-label">最高紀錄</div>
+                    <div class="stat-label">BEST</div>
                     <div class="stat-value" id="bestScoreModal">0</div>
                 </div>
             </div>
             <button class="btn btn-primary" id="modalRestartBtn" style="width: 100%; font-size: 18px; padding: 12px;">
-                重新開始
+                RESTART
             </button>
         </div>
     </div>
