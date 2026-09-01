@@ -1,6 +1,6 @@
 /**
  * Colored Pencil / Crayon Doodle Particle System
- * High performance & memory bounded.
+ * High performance & memory bounded, with clear & long-lasting score popups.
  */
 
 class ParticleSystem {
@@ -16,6 +16,7 @@ class ParticleSystem {
         const baseColor = fruitData.color;
         const count = Math.min(14, 8 + fruitData.tier);
 
+        // Juice drops
         for (let i = 0; i < count; i++) {
             if (this.particles.length >= this.maxParticles) break;
             const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
@@ -39,6 +40,7 @@ class ParticleSystem {
             });
         }
 
+        // Stars
         const starCount = Math.min(4, 2 + Math.floor(fruitData.tier / 2));
         for (let i = 0; i < starCount; i++) {
             if (this.particles.length >= this.maxParticles) break;
@@ -64,17 +66,20 @@ class ParticleSystem {
             });
         }
 
+        // Floating Score Popup: Long-lasting, clear, bouncy
         if (score > 0) {
             this.floatingTexts.push({
                 x: x,
-                y: y - 10,
+                y: y - 12,
                 text: `+${score}`,
                 color: '#D63031',
                 alpha: 1,
-                scale: 1 + Math.min(combo * 0.15, 0.4),
-                vy: -2.0,
-                life: 35,
-                maxLife: 35
+                scale: 0.6, // Starts small and pops up
+                targetScale: 1.1 + Math.min(combo * 0.12, 0.4),
+                vy: -2.4,
+                life: 75,      // ~1.25 seconds total duration
+                maxLife: 75,
+                fadeThreshold: 28 // Only fade during the last 28 frames
             });
         }
     }
@@ -101,6 +106,7 @@ class ParticleSystem {
     }
 
     update() {
+        // Update particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
             p.x += p.vx;
@@ -118,18 +124,30 @@ class ParticleSystem {
             }
         }
 
+        // Update floating score text (Stays solid, then gently fades)
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const t = this.floatingTexts[i];
             t.y += t.vy;
-            t.vy *= 0.94;
+            t.vy *= 0.95; // Smooth deceleration
+
+            // Elastic pop scale at start
+            t.scale += (t.targetScale - t.scale) * 0.25;
+
             t.life--;
-            t.alpha = t.life / t.maxLife;
+
+            // Keep fully opaque until the final fadeThreshold frames
+            if (t.life <= t.fadeThreshold) {
+                t.alpha = t.life / t.fadeThreshold;
+            } else {
+                t.alpha = 1.0;
+            }
 
             if (t.life <= 0) {
                 this.floatingTexts.splice(i, 1);
             }
         }
 
+        // Update confetti
         for (let i = this.confetti.length - 1; i >= 0; i--) {
             const c = this.confetti[i];
             c.x += c.vx + Math.sin(c.life * 0.08) * 0.6;
@@ -147,6 +165,7 @@ class ParticleSystem {
     draw(ctx) {
         ctx.save();
 
+        // 1. Draw particles
         for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
             ctx.save();
@@ -174,6 +193,7 @@ class ParticleSystem {
             ctx.restore();
         }
 
+        // 2. Draw confetti
         for (let i = 0; i < this.confetti.length; i++) {
             const c = this.confetti[i];
             ctx.save();
@@ -185,6 +205,7 @@ class ParticleSystem {
             ctx.restore();
         }
 
+        // 3. Draw Floating Score Text (Bold, clear, white stroke outline)
         for (let i = 0; i < this.floatingTexts.length; i++) {
             const t = this.floatingTexts[i];
             ctx.save();
@@ -192,15 +213,17 @@ class ParticleSystem {
             ctx.translate(t.x, t.y);
             ctx.scale(t.scale, t.scale);
 
-            ctx.font = 'bold 20px "Microsoft JhengHei", "微軟正黑體", sans-serif';
+            ctx.font = 'bold 24px "Microsoft JhengHei", "微軟正黑體", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
+            // Strong white outline stroke for clear visibility on any background
             ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 5.5;
             ctx.lineJoin = 'round';
             ctx.strokeText(t.text, 0, 0);
 
+            // Vibrant red score text
             ctx.fillStyle = t.color;
             ctx.fillText(t.text, 0, 0);
 
