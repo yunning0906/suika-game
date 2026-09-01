@@ -1,6 +1,6 @@
 /**
  * Colored Pencil / Crayon Doodle Particle System
- * High performance & memory bounded, with clear & long-lasting score popups.
+ * High performance & memory bounded, with extra-long persistent score popups.
  */
 
 class ParticleSystem {
@@ -66,20 +66,20 @@ class ParticleSystem {
             });
         }
 
-        // Floating Score Popup: Long-lasting, clear, bouncy
+        // Extra long persistent score popup (Stays ~2.4 seconds total!)
         if (score > 0) {
             this.floatingTexts.push({
                 x: x,
-                y: y - 12,
+                y: y - 14,
                 text: `+${score}`,
                 color: '#D63031',
                 alpha: 1,
-                scale: 0.6, // Starts small and pops up
-                targetScale: 1.1 + Math.min(combo * 0.12, 0.4),
-                vy: -2.4,
-                life: 75,      // ~1.25 seconds total duration
-                maxLife: 75,
-                fadeThreshold: 28 // Only fade during the last 28 frames
+                scale: 0.5,
+                targetScale: 1.15 + Math.min(combo * 0.12, 0.4),
+                vy: -2.8,
+                life: 140,         // ~2.33 seconds total duration
+                maxLife: 140,
+                fadeThreshold: 45  // Only fade in the last 0.75 seconds
             });
         }
     }
@@ -124,18 +124,18 @@ class ParticleSystem {
             }
         }
 
-        // Update floating score text (Stays solid, then gently fades)
+        // Update floating score texts
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const t = this.floatingTexts[i];
             t.y += t.vy;
-            t.vy *= 0.95; // Smooth deceleration
+            t.vy *= 0.95; // Gentle smooth float up and hover
 
-            // Elastic pop scale at start
-            t.scale += (t.targetScale - t.scale) * 0.25;
+            // Bouncy pop-in
+            t.scale += (t.targetScale - t.scale) * 0.22;
 
             t.life--;
 
-            // Keep fully opaque until the final fadeThreshold frames
+            // Fully solid for ~1.6 seconds, then gentle fade out during last 0.75s
             if (t.life <= t.fadeThreshold) {
                 t.alpha = t.life / t.fadeThreshold;
             } else {
@@ -205,7 +205,7 @@ class ParticleSystem {
             ctx.restore();
         }
 
-        // 3. Draw Floating Score Text (Bold, clear, white stroke outline)
+        // 3. Draw Floating Score Text (Bold, large, clear white stroke)
         for (let i = 0; i < this.floatingTexts.length; i++) {
             const t = this.floatingTexts[i];
             ctx.save();
@@ -213,17 +213,17 @@ class ParticleSystem {
             ctx.translate(t.x, t.y);
             ctx.scale(t.scale, t.scale);
 
-            ctx.font = 'bold 24px "Microsoft JhengHei", "微軟正黑體", sans-serif';
+            ctx.font = 'bold 26px "Microsoft JhengHei", "微軟正黑體", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Strong white outline stroke for clear visibility on any background
+            // Thick white outline for crystal-clear readability
             ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 5.5;
+            ctx.lineWidth = 6;
             ctx.lineJoin = 'round';
             ctx.strokeText(t.text, 0, 0);
 
-            // Vibrant red score text
+            // Bold red score text
             ctx.fillStyle = t.color;
             ctx.fillText(t.text, 0, 0);
 
