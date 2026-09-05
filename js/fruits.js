@@ -183,43 +183,21 @@ class FruitRenderer {
     }
 
     drawPencilBody(ctx, config, r) {
+        // Pure clean pastel fill
         ctx.fillStyle = config.color;
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Shading crosshatch strokes (bottom-right shadow)
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(0, 0, r - 1, 0, Math.PI * 2);
-        ctx.clip();
-
-        ctx.strokeStyle = config.pencilOutline;
-        ctx.globalAlpha = 0.14;
-        ctx.lineWidth = 1.2;
-        for (let i = -r * 0.5; i <= r * 1.3; i += 6) {
-            ctx.beginPath();
-            ctx.moveTo(i, r * 0.25);
-            ctx.lineTo(i + r * 0.5, r * 0.95);
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        // Hand-Drawn Outline
+        // Clean uniform hand-drawn outline
         ctx.save();
         ctx.strokeStyle = config.pencilOutline;
-        ctx.lineWidth = Math.max(2.2, r * 0.05);
+        ctx.lineWidth = Math.max(2.0, r * 0.045);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = Math.max(1.2, r * 0.03);
-        ctx.beginPath();
-        ctx.arc(0.3, 0.3, r - 0.5, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
     }
