@@ -126,6 +126,9 @@ class PhysicsWorld {
             if (speed > 2.5) {
                 bodyA.scaleX = 1.15;
                 bodyA.scaleY = 0.88;
+                if (speed > 3.5 && window.soundEngine) {
+                    window.soundEngine.playBounce();
+                }
             }
         }
         if (bodyB.label === 'fruit') {
@@ -133,6 +136,9 @@ class PhysicsWorld {
             if (speed > 2.5) {
                 bodyB.scaleX = 1.15;
                 bodyB.scaleY = 0.88;
+                if (speed > 3.5 && window.soundEngine) {
+                    window.soundEngine.playBounce();
+                }
             }
         }
 
@@ -196,11 +202,21 @@ class PhysicsWorld {
                 this.onScoreAdd(totalScore, this.comboCount, fruitConfig);
             }
 
+            if (window.soundEngine) {
+                window.soundEngine.playMerge(nextTier, this.comboCount);
+                if (this.comboCount > 1) {
+                    window.soundEngine.playCombo(this.comboCount);
+                }
+            }
+
             if (window.particleSystem) {
                 window.particleSystem.spawnMergeEffect(midX, midY, fruitConfig, totalScore, this.comboCount);
             }
 
             if (nextTier === FRUIT_TIERS.length - 1) {
+                if (window.soundEngine) {
+                    window.soundEngine.playVictory();
+                }
                 if (window.particleSystem) {
                     window.particleSystem.spawnVictoryConfetti(this.width, this.height);
                 }

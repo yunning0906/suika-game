@@ -127,6 +127,11 @@ class SuikaGame {
         // Downward velocity for immediate snappy fall
         Matter.Body.setVelocity(fruitBody, { x: 0, y: 5.5 });
 
+        // Play cute bubble drop sound
+        if (window.soundEngine) {
+            window.soundEngine.playDrop();
+        }
+
         this.currentTier = this.nextTier;
         this.nextTier = this.getRandomDropTier();
         this.renderNextFruitPreview();
@@ -243,6 +248,10 @@ class SuikaGame {
         if (this.isGameOver) return;
         this.isGameOver = true;
 
+        if (window.soundEngine) {
+            window.soundEngine.playGameOver();
+        }
+
         if (this.finalScoreEl) this.finalScoreEl.textContent = this.score;
         if (this.bestScoreEl) this.bestScoreEl.textContent = this.highScore;
 
@@ -252,6 +261,10 @@ class SuikaGame {
     }
 
     resetGame() {
+        if (window.soundEngine) {
+            window.soundEngine.playClick();
+        }
+
         this.score = 0;
         this.isGameOver = false;
         this.canDrop = true;

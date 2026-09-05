@@ -1,58 +1,61 @@
 /**
- * Kawaii Sound & Music Synthesizer using Web Audio API
- * Zero external audio files required, highly reliable & low latency!
+ * Kawaii Sound Synthesizer using Web Audio API
+ * Pure synthesized cute sound effects: bubble bloop, marimba chimes, soft pops, victory sparkles!
+ * Zero external audio files required, ultra-low latency & iOS/Safari compatible.
  */
 
 class SoundEngine {
     constructor() {
         this.ctx = null;
         this.sfxEnabled = true;
-        this.bgmEnabled = false;
-        this.bgmTimer = null;
-        this.bgmStep = 0;
         this.isMuted = false;
+        this.lastBounceTime = 0;
 
-        // Pentatonic kawaii melody notes for procedural BGM (C major / A minor pentatonic)
-        this.bgmMelody = [
-            523.25, 587.33, 659.25, 783.99, 880.00, // C5, D5, E5, G5, A5
-            1046.50, 880.00, 783.99, 659.25, 587.33,
-            659.25, 783.99, 880.00, 1046.50, 1174.66,
-            1046.50, 880.00, 783.99, 659.25, 523.25
-        ];
+        // Auto-unlock audio context on first user interaction
+        this.setupUnlock();
+    }
 
-        this.bgmBass = [
-            261.63, 261.63, 329.63, 392.00, // C4, C4, E4, G4
-            220.00, 220.00, 261.63, 329.63, // A3, A3, C4, E4
-            174.61, 174.61, 220.00, 261.63, // F3, F3, A3, C4
-            196.00, 196.00, 246.94, 293.66  // G3, G3, B3, D4
-        ];
+    setupUnlock() {
+        const unlock = () => {
+            this.init();
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('touchstart', unlock);
+            document.removeEventListener('pointerdown', unlock);
+        };
+        document.addEventListener('click', unlock, { once: true });
+        document.addEventListener('touchstart', unlock, { once: true });
+        document.addEventListener('pointerdown', unlock, { once: true });
     }
 
     init() {
         if (!this.ctx) {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            this.ctx = new AudioCtx();
+            if (AudioCtx) {
+                this.ctx = new AudioCtx();
+            }
         }
-        if (this.ctx.state === 'suspended') {
+        if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
         }
     }
 
-    // Cute Bubble Pop on fruit drop
+    // 1. Cute Bubble Bloop on fruit drop (水滴啵啵聲)
     playDrop() {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+        // Gentle cheerful bloop
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.08);
 
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -61,70 +64,101 @@ class SoundEngine {
         osc.stop(now + 0.09);
     }
 
-    // Cute Marimba / Bell Pop on fruit merge with pitch scaled by tier & combo
+    // 2. Cute Soft Squish/Pop on fruit collisions (水果彈跳輕微啵聲)
+    playBounce() {
+        if (!this.sfxEnabled || this.isMuted) return;
+        const nowMs = Date.now();
+        if (nowMs - this.lastBounceTime < 90) return; // Throttle to prevent acoustic clutter
+        this.lastBounceTime = nowMs;
+
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260 + Math.random() * 80, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.06);
+    }
+
+    // 3. Cute Sweet Glockenspiel / Marimba Bell on Fruit Merge (水果合成清脆鈴鐺聲)
     playMerge(tier = 0, combo = 1) {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
         const now = this.ctx.currentTime;
-        // Base frequencies for fruit tiers (pleasant ascending scale)
+
+        // Pentatonic / Diatonic ascending scale for sweet harmonies
         const baseFreqs = [
-            392.00, // G4 (Cherry)
-            440.00, // A4 (Strawberry)
-            493.88, // B4 (Grape)
-            523.25, // C5 (Dekopon)
-            587.33, // D5 (Persimmon)
-            659.25, // E5 (Apple)
-            698.46, // F5 (Pear)
-            783.99, // G5 (Peach)
-            880.00, // A5 (Pineapple)
-            987.77, // B5 (Melon)
-            1046.50 // C6 (Watermelon)
+            440.00, // A4 (Cherry)
+            493.88, // B4 (Strawberry)
+            554.37, // C#5 (Grape)
+            587.33, // D5 (Dekopon)
+            659.25, // E5 (Persimmon)
+            739.99, // F#5 (Apple)
+            830.61, // G#5 (Pear)
+            880.00, // A5 (Peach)
+            987.77, // B5 (Pineapple)
+            1108.73, // C#6 (Melon)
+            1174.66  // D6 (Watermelon)
         ];
 
         let freq = baseFreqs[Math.min(tier, baseFreqs.length - 1)] || 523.25;
         if (combo > 1) {
-            freq *= Math.pow(1.05946, Math.min(combo, 6)); // Step up semitone per combo
+            freq *= Math.pow(1.05946, Math.min(combo, 6)); // Shift pitch up per combo
         }
 
-        // Primary bell tone
+        // Primary cute chime
         const osc1 = this.ctx.createOscillator();
         const gain1 = this.ctx.createGain();
         osc1.type = 'triangle';
         osc1.frequency.setValueAtTime(freq, now);
-        osc1.frequency.exponentialRampToValueAtTime(freq * 1.3, now + 0.04);
-        osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.18);
+        osc1.frequency.exponentialRampToValueAtTime(freq * 1.02, now + 0.03);
+        osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.16);
 
-        gain1.gain.setValueAtTime(0.35, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        gain1.gain.setValueAtTime(0.32, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
 
         osc1.connect(gain1);
         gain1.connect(this.ctx.destination);
         osc1.start(now);
-        osc1.stop(now + 0.26);
+        osc1.stop(now + 0.28);
 
-        // Secondary sparkle harmonic
+        // Secondary sparkle overtone (adds kawaii shimmer)
         const osc2 = this.ctx.createOscillator();
         const gain2 = this.ctx.createGain();
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(freq * 2.02, now);
+        osc2.frequency.setValueAtTime(freq * 2.0, now);
 
-        gain2.gain.setValueAtTime(0.2, now);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        gain2.gain.setValueAtTime(0.18, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
 
         osc2.connect(gain2);
         gain2.connect(this.ctx.destination);
         osc2.start(now);
-        osc2.stop(now + 0.36);
+        osc2.stop(now + 0.24);
     }
 
-    // Multi-pop sparkle for Combos
+    // 4. Multi-pop sparkle for Combo Chains (連擊小精靈音)
     playCombo(combo = 2) {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
-        const notes = [659.25, 783.99, 1046.50, 1318.51];
-        notes.forEach((freq, idx) => {
+        const chordNotes = [783.99, 987.77, 1174.66, 1567.98];
+        chordNotes.forEach((freq, idx) => {
             const now = this.ctx.currentTime + idx * 0.04;
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -132,172 +166,88 @@ class SoundEngine {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, now);
 
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.16);
+            osc.stop(now + 0.15);
         });
     }
 
-    // High Score / Watermelon Victory Celebration Jingle
+    // 5. Watermelon Synthesis Celebration Jingle (合成大西瓜歡慶音)
     playVictory() {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
         const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
         chord.forEach((freq, idx) => {
-            const now = this.ctx.currentTime + idx * 0.08;
+            const now = this.ctx.currentTime + idx * 0.07;
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
 
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, now);
 
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
 
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.65);
+            osc.stop(now + 0.6);
         });
     }
 
-    // Cute Game Over Sound
+    // 6. Cute Gentle Game Over (遊戲結束音)
     playGameOver() {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
-        const tones = [523.25, 493.88, 440.00, 392.00, 329.63];
+        const tones = [587.33, 523.25, 493.88, 392.00];
         tones.forEach((freq, idx) => {
-            const now = this.ctx.currentTime + idx * 0.15;
+            const now = this.ctx.currentTime + idx * 0.14;
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
 
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, now);
-            osc.frequency.exponentialRampToValueAtTime(freq * 0.85, now + 0.18);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.9, now + 0.16);
 
-            gain.gain.setValueAtTime(0.25, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.25);
+            osc.stop(now + 0.22);
         });
     }
 
-    // Button tap sound
+    // 7. Button Tap Pop (按鍵音)
     playClick() {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
+        if (!this.ctx) return;
 
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+        osc.frequency.setValueAtTime(650, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.04);
 
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.06);
-    }
-
-    // Gentle Kawaii Music Loop (synthesized piano / music box)
-    startBGM() {
-        this.bgmEnabled = true;
-        if (this.isMuted) return;
-        this.init();
-        if (this.bgmTimer) return;
-
-        this.bgmStep = 0;
-        this.bgmTimer = setInterval(() => {
-            if (!this.bgmEnabled || this.isMuted || !this.ctx) return;
-
-            const now = this.ctx.currentTime;
-            
-            // Melody note
-            const noteFreq = this.bgmMelody[this.bgmStep % this.bgmMelody.length];
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(noteFreq, now);
-
-            // Very gentle soft volume
-            gain.gain.setValueAtTime(0.05, now);
-            gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.38);
-
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.4);
-
-            // Bass note every 2 steps
-            if (this.bgmStep % 2 === 0) {
-                const bassIndex = Math.floor(this.bgmStep / 2) % this.bgmBass.length;
-                const bassFreq = this.bgmBass[bassIndex];
-                const bOsc = this.ctx.createOscillator();
-                const bGain = this.ctx.createGain();
-
-                bOsc.type = 'sine';
-                bOsc.frequency.setValueAtTime(bassFreq, now);
-
-                bGain.gain.setValueAtTime(0.04, now);
-                bGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.6);
-
-                bOsc.connect(bGain);
-                bGain.connect(this.ctx.destination);
-                bOsc.start(now);
-                bOsc.stop(now + 0.65);
-            }
-
-            this.bgmStep++;
-        }, 260); // ~115 BPM rhythm
-    }
-
-    stopBGM() {
-        this.bgmEnabled = false;
-        if (this.bgmTimer) {
-            clearInterval(this.bgmTimer);
-            this.bgmTimer = null;
-        }
-    }
-
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-        if (this.isMuted) {
-            if (this.bgmTimer) clearInterval(this.bgmTimer);
-            this.bgmTimer = null;
-        } else if (this.bgmEnabled) {
-            this.startBGM();
-        }
-        return this.isMuted;
-    }
-
-    toggleSFX() {
-        this.sfxEnabled = !this.sfxEnabled;
-        return this.sfxEnabled;
-    }
-
-    toggleBGM() {
-        if (this.bgmEnabled) {
-            this.stopBGM();
-            return false;
-        } else {
-            this.startBGM();
-            return true;
-        }
+        osc.stop(now + 0.05);
     }
 }
 
