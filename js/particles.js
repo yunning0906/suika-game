@@ -213,13 +213,13 @@ class ParticleSystem {
             ctx.translate(t.x, t.y);
             ctx.scale(t.scale, t.scale);
 
-            ctx.font = 'bold 26px "Microsoft JhengHei", "微軟正黑體", sans-serif';
+            ctx.font = '500 24px "Segoe UI", "Microsoft JhengHei", "微軟正黑體", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Thick white outline for crystal-clear readability
+            // Clean white outline
             ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 3.5;
             ctx.lineJoin = 'round';
             ctx.strokeText(t.text, 0, 0);
 

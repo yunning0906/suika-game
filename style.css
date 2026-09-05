@@ -7,9 +7,9 @@
     --text-black: #000000;
     --pencil-border: #524338;
     
-    --sketch-border: 2.2px solid var(--pencil-border);
-    --sketch-shadow: 4px 4px 0px rgba(82, 67, 56, 0.16);
-    --sketch-shadow-hover: 6px 6px 0px rgba(82, 67, 56, 0.2);
+    --sketch-border: 2px solid var(--pencil-border);
+    --sketch-shadow: none;
+    --sketch-shadow-hover: none;
     
     --font-main: 'Segoe UI', 'Microsoft JhengHei', '微軟正黑體', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
@@ -50,38 +50,38 @@ body {
     justify-content: center;
 }
 
-/* Left Side Panel: Clean Rounded Rectangle */
+/* Left Side Panel: Clean Rounded Rectangle, No Shadow */
 .side-panel {
     background: var(--paper-card);
     border: var(--sketch-border);
     border-radius: 24px;
     padding: 22px;
-    box-shadow: var(--sketch-shadow);
+    box-shadow: none;
     display: flex;
     flex-direction: column;
     gap: 16px;
     width: 240px;
 }
 
-/* 1. Game Title: Black */
+/* 1. Game Title: Thinner font, Black */
 .brand-title {
     text-align: center;
     font-family: var(--font-main);
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 26px;
+    font-weight: 600;
     color: var(--text-black);
     margin-bottom: 2px;
     letter-spacing: 0.5px;
 }
 
-/* Stat Cards (Rounded Rectangles) */
+/* Stat Cards: Thinner fonts, No Shadow */
 .stat-box {
     background: #FFFDF8;
-    border: 2px solid var(--pencil-border);
+    border: 1.8px solid var(--pencil-border);
     border-radius: 16px;
     padding: 12px 14px;
     text-align: center;
-    box-shadow: 3px 3px 0px rgba(82, 67, 56, 0.12);
+    box-shadow: none;
     transition: transform 0.2s ease;
 }
 
@@ -90,11 +90,11 @@ body {
     border-color: var(--pencil-border);
 }
 
-/* Black Text */
+/* Thinner Text */
 .stat-label {
     font-family: var(--font-main);
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-black);
     margin-bottom: 2px;
     letter-spacing: 1px;
@@ -102,8 +102,8 @@ body {
 
 .stat-value {
     font-family: var(--font-main);
-    font-size: 32px;
-    font-weight: 800;
+    font-size: 30px;
+    font-weight: 600;
     color: var(--text-black);
     line-height: 1.1;
 }
@@ -112,16 +112,16 @@ body {
     color: var(--text-black);
 }
 
-/* Next Fruit Preview Card */
+/* Next Fruit Preview Card: No Shadow */
 .next-fruit-card {
     background: #F8FAF6;
-    border: 2px solid var(--pencil-border);
+    border: 1.8px solid var(--pencil-border);
     border-radius: 16px;
     padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 3px 3px 0px rgba(82, 67, 56, 0.12);
+    box-shadow: none;
 }
 
 .next-fruit-canvas {
@@ -137,19 +137,19 @@ body {
     gap: 10px;
 }
 
-/* Restart Button */
+/* Restart Button: Thinner text, No Shadow */
 .btn {
     font-family: var(--font-main);
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 600;
     padding: 12px 16px;
     border-radius: 16px;
-    border: 2px solid var(--pencil-border);
+    border: 1.8px solid var(--pencil-border);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: var(--sketch-shadow);
+    box-shadow: none;
     transition: all 0.15s ease;
     background: #FFE8EC;
     color: #D63031;
@@ -157,14 +157,14 @@ body {
 }
 
 .btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--sketch-shadow-hover);
+    transform: translateY(-1px);
     background: #FFD4DC;
+    box-shadow: none;
 }
 
 .btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px rgba(82, 67, 56, 0.2);
+    transform: translateY(1px);
+    box-shadow: none;
 }
 
 /* Center Game Area */
@@ -174,6 +174,7 @@ body {
     align-items: center;
 }
 
+/* Canvas Container (Grid inside, No Shadow) */
 .canvas-container {
     background-color: #FFFDF9;
     /* Notebook Grid inside Game Canvas */
@@ -183,7 +184,7 @@ body {
     background-size: 22px 22px;
     border: var(--sketch-border);
     border-radius: 24px;
-    box-shadow: var(--sketch-shadow);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
     width: 440px;
@@ -198,15 +199,15 @@ body {
     touch-action: none;
 }
 
-/* Bottom Horizontal Evolution Bar (Single Row Canvas) */
+/* Bottom Horizontal Evolution Bar (No Shadow) */
 .bottom-evolution-bar {
     margin-top: 14px;
     width: 100%;
     background: #FFFEFA;
-    border: 2px solid var(--pencil-border);
+    border: 1.8px solid var(--pencil-border);
     border-radius: 16px;
     padding: 6px 8px;
-    box-shadow: var(--sketch-shadow);
+    box-shadow: none;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -218,16 +219,16 @@ body {
     height: 50px;
 }
 
-/* Game Over Modal */
+/* Game Over Modal: No Heavy Shadow */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -249,8 +250,8 @@ body {
     max-width: 360px;
     width: 100%;
     text-align: center;
-    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.2);
-    border: 3px solid var(--pencil-border);
+    box-shadow: none;
+    border: 2px solid var(--pencil-border);
 }
 
 .modal-score-cards {
