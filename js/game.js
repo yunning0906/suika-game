@@ -32,6 +32,11 @@ class SuikaGame {
         this.renderNextFruitPreview();
         this.renderEvolutionBar();
 
+        // Start continuous cute background music
+        if (window.soundEngine) {
+            window.soundEngine.startBGM();
+        }
+
         this.lastTime = performance.now();
         requestAnimationFrame((t) => this.gameLoop(t));
     }

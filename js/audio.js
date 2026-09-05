@@ -1,30 +1,88 @@
 /**
- * Kawaii Sound Synthesizer using Web Audio API
- * Pure synthesized cute sound effects: bubble bloop, marimba chimes, soft pops, victory sparkles!
- * Zero external audio files required, ultra-low latency & iOS/Safari compatible.
+ * Kawaii Sound & Continuous Background Music Synthesizer (Web Audio API)
+ * Plays a warm, charming Music Box / Kalimba melody that loops continuously
+ * whether clicking or not, with ultra-cute interactive sound effects.
  */
 
 class SoundEngine {
     constructor() {
         this.ctx = null;
         this.sfxEnabled = true;
+        this.bgmEnabled = true;
         this.isMuted = false;
         this.lastBounceTime = 0;
 
-        // Auto-unlock audio context on first user interaction
-        this.setupUnlock();
+        // BGM Sequencer State
+        this.bgmTimer = null;
+        this.currentStep = 0;
+        this.nextNoteTime = 0;
+        this.tempo = 118; // Warm, cheerful Kawaii tempo
+        this.stepDuration = 60 / this.tempo / 2; // Eighth notes (approx 0.254s per step)
+        this.scheduleAheadTime = 0.15; // 150ms lookahead for jitter-free rhythm
+
+        // Kawaii Music Box Frequencies (Fmaj7 -> G7 -> Em7 -> Am7 Royal Road Loop)
+        // Melody notes (0 = rest)
+        this.melodyTrack = [
+            // Bar 1: Fmaj7 (Sweet & cozy)
+            523.25, 659.25, 783.99, 880.00,  659.25, 783.99, 1046.50, 880.00,
+            // Bar 2: G7 (Playful lift)
+            783.99, 880.00, 987.77, 1046.50, 880.00, 783.99, 659.25,  587.33,
+            // Bar 3: Em7 (Dreamy warmth)
+            659.25, 783.99, 880.00, 1046.50, 783.99, 659.25, 587.33,  523.25,
+            // Bar 4: Am7 (Gentle resolution)
+            587.33, 659.25, 783.99, 659.25,  587.33, 523.25, 440.00,  523.25
+        ];
+
+        // Bassline chords (Root + Fifth pulse)
+        this.bassTrack = [
+            174.61, 0, 261.63, 0,  174.61, 0, 261.63, 0, // F3, C4
+            196.00, 0, 293.66, 0,  196.00, 0, 293.66, 0, // G3, D4
+            164.81, 0, 246.94, 0,  164.81, 0, 246.94, 0, // E3, B3
+            220.00, 0, 261.63, 0,  220.00, 0, 329.63, 0  // A3, C4, E4
+        ];
+
+        // Soft arpeggio accompaniment
+        this.harmonyTrack = [
+            349.23, 440.00, 523.25, 659.25, // F4, A4, C5, E5
+            392.00, 493.88, 587.33, 783.99, // G4, B4, D5, G5
+            329.63, 392.00, 493.88, 659.25, // E4, G4, B4, E5
+            440.00, 523.25, 659.25, 880.00  // A4, C5, E5, A5
+        ];
+
+        this.setupAutoPlay();
     }
 
-    setupUnlock() {
-        const unlock = () => {
+    setupAutoPlay() {
+        // Attempt autoplay immediately
+        this.init();
+        if (this.ctx && this.ctx.state === 'running') {
+            this.startBGM();
+        }
+
+        // Resume / Start on ANY user interaction if initial state was suspended by browser policy
+        const startAudio = () => {
             this.init();
-            document.removeEventListener('click', unlock);
-            document.removeEventListener('touchstart', unlock);
-            document.removeEventListener('pointerdown', unlock);
+            if (this.ctx && this.ctx.state === 'running') {
+                this.startBGM();
+            }
         };
-        document.addEventListener('click', unlock, { once: true });
-        document.addEventListener('touchstart', unlock, { once: true });
-        document.addEventListener('pointerdown', unlock, { once: true });
+
+        const events = ['click', 'touchstart', 'pointerdown', 'keydown', 'mousemove', 'wheel'];
+        const triggerOnce = () => {
+            startAudio();
+            events.forEach(evt => document.removeEventListener(evt, triggerOnce));
+        };
+        events.forEach(evt => document.addEventListener(evt, triggerOnce, { passive: true }));
+
+        // Keep playing if tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.init();
+                if (this.bgmEnabled) {
+                    this.startBGM();
+                }
+            }
+        });
     }
 
     init() {
@@ -35,9 +93,135 @@ class SoundEngine {
             }
         }
         if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().then(() => {
+                if (this.bgmEnabled) {
+                    this.startBGM();
+                }
+            }).catch(() => {});
         }
     }
+
+    /**
+     * Start continuous background music loop
+     */
+    startBGM() {
+        this.bgmEnabled = true;
+        if (!this.ctx || this.isMuted) return;
+
+        if (this.bgmTimer) return; // Already running
+
+        this.nextNoteTime = this.ctx.currentTime + 0.05;
+        this.currentStep = 0;
+
+        // Rock-solid lookahead scheduler: runs every 35ms
+        this.bgmTimer = setInterval(() => {
+            if (!this.bgmEnabled || this.isMuted || !this.ctx) return;
+            this.scheduler();
+        }, 35);
+    }
+
+    scheduler() {
+        if (!this.ctx) return;
+        // Schedule all notes up to the lookahead boundary
+        while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
+            this.playBGMStep(this.currentStep, this.nextNoteTime);
+            this.nextNoteTime += this.stepDuration;
+            this.currentStep = (this.currentStep + 1) % this.melodyTrack.length;
+        }
+    }
+
+    playBGMStep(step, time) {
+        if (!this.ctx) return;
+
+        // 1. Kawaii Music Box Melody Note
+        const melFreq = this.melodyTrack[step];
+        if (melFreq > 0) {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            // Blend triangle for sweet kalimba/music box warmth
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(melFreq, time);
+
+            // Very gentle volume (~0.05) so it's charming and soothing
+            gain.gain.setValueAtTime(0.045, time);
+            gain.gain.exponentialRampToValueAtTime(0.0002, time + 0.38);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(time);
+            osc.stop(time + 0.4);
+
+            // Shimmer overtone
+            const osc2 = this.ctx.createOscillator();
+            const gain2 = this.ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(melFreq * 2, time);
+
+            gain2.gain.setValueAtTime(0.015, time);
+            gain2.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
+
+            osc2.connect(gain2);
+            gain2.connect(this.ctx.destination);
+
+            osc2.start(time);
+            osc2.stop(time + 0.25);
+        }
+
+        // 2. Gentle Bass Note
+        const bassFreq = this.bassTrack[step];
+        if (bassFreq > 0) {
+            const bOsc = this.ctx.createOscillator();
+            const bGain = this.ctx.createGain();
+
+            bOsc.type = 'sine';
+            bOsc.frequency.setValueAtTime(bassFreq, time);
+
+            bGain.gain.setValueAtTime(0.038, time);
+            bGain.gain.exponentialRampToValueAtTime(0.0002, time + 0.48);
+
+            bOsc.connect(bGain);
+            bGain.connect(this.ctx.destination);
+
+            bOsc.start(time);
+            bOsc.stop(time + 0.5);
+        }
+
+        // 3. Soft Arpeggio Accent every 2 steps
+        if (step % 2 === 1) {
+            const chordIdx = Math.floor(step / 8);
+            const harmFreq = this.harmonyTrack[(chordIdx * 4 + ((step % 8) >> 1)) % this.harmonyTrack.length];
+            if (harmFreq > 0) {
+                const hOsc = this.ctx.createOscillator();
+                const hGain = this.ctx.createGain();
+
+                hOsc.type = 'sine';
+                hOsc.frequency.setValueAtTime(harmFreq, time);
+
+                hGain.gain.setValueAtTime(0.018, time);
+                hGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
+
+                hOsc.connect(hGain);
+                hGain.connect(this.ctx.destination);
+
+                hOsc.start(time);
+                hOsc.stop(time + 0.34);
+            }
+        }
+    }
+
+    stopBGM() {
+        this.bgmEnabled = false;
+        if (this.bgmTimer) {
+            clearInterval(this.bgmTimer);
+            this.bgmTimer = null;
+        }
+    }
+
+    /* -------------------------------------------------------------
+     * INTERACTIVE CUTE SOUND EFFECTS (SFX)
+     * ------------------------------------------------------------- */
 
     // 1. Cute Bubble Bloop on fruit drop (水滴啵啵聲)
     playDrop() {
@@ -50,9 +234,8 @@ class SoundEngine {
         const gain = this.ctx.createGain();
 
         osc.type = 'sine';
-        // Gentle cheerful bloop
-        osc.frequency.setValueAtTime(420, now);
-        osc.frequency.exponentialRampToValueAtTime(180, now + 0.08);
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(190, now + 0.08);
 
         gain.gain.setValueAtTime(0.22, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
@@ -68,7 +251,7 @@ class SoundEngine {
     playBounce() {
         if (!this.sfxEnabled || this.isMuted) return;
         const nowMs = Date.now();
-        if (nowMs - this.lastBounceTime < 90) return; // Throttle to prevent acoustic clutter
+        if (nowMs - this.lastBounceTime < 90) return;
         this.lastBounceTime = nowMs;
 
         this.init();
@@ -92,7 +275,7 @@ class SoundEngine {
         osc.stop(now + 0.06);
     }
 
-    // 3. Cute Sweet Glockenspiel / Marimba Bell on Fruit Merge (水果合成清脆鈴鐺聲)
+    // 3. Cute Glockenspiel / Marimba Bell on Fruit Merge (水果合成清脆鈴鐺聲)
     playMerge(tier = 0, combo = 1) {
         if (!this.sfxEnabled || this.isMuted) return;
         this.init();
@@ -100,7 +283,6 @@ class SoundEngine {
 
         const now = this.ctx.currentTime;
 
-        // Pentatonic / Diatonic ascending scale for sweet harmonies
         const baseFreqs = [
             440.00, // A4 (Cherry)
             493.88, // B4 (Strawberry)
@@ -117,10 +299,9 @@ class SoundEngine {
 
         let freq = baseFreqs[Math.min(tier, baseFreqs.length - 1)] || 523.25;
         if (combo > 1) {
-            freq *= Math.pow(1.05946, Math.min(combo, 6)); // Shift pitch up per combo
+            freq *= Math.pow(1.05946, Math.min(combo, 6));
         }
 
-        // Primary cute chime
         const osc1 = this.ctx.createOscillator();
         const gain1 = this.ctx.createGain();
         osc1.type = 'triangle';
@@ -136,7 +317,6 @@ class SoundEngine {
         osc1.start(now);
         osc1.stop(now + 0.28);
 
-        // Secondary sparkle overtone (adds kawaii shimmer)
         const osc2 = this.ctx.createOscillator();
         const gain2 = this.ctx.createGain();
         osc2.type = 'sine';
