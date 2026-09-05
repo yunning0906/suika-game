@@ -72,7 +72,7 @@ class ParticleSystem {
                 x: x,
                 y: y - 14,
                 text: `+${score}`,
-                color: '#E67E22', // Warm Caramel Amber / 焦糖金橙色
+                color: '#F37021', // Pure vibrant orange
                 alpha: 1,
                 scale: 0.5,
                 targetScale: 1.15 + Math.min(combo * 0.12, 0.4),
@@ -217,13 +217,7 @@ class ParticleSystem {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Clean white outline
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 3.5;
-            ctx.lineJoin = 'round';
-            ctx.strokeText(t.text, 0, 0);
-
-            // Warm amber score text
+            // Pure orange score text (no white outline)
             ctx.fillStyle = t.color;
             ctx.fillText(t.text, 0, 0);
 
