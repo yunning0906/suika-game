@@ -16,9 +16,9 @@ class SoundEngine {
         this.bgmTimer = null;
         this.currentStep = 0;
         this.nextNoteTime = 0;
-        this.tempo = 118; // Warm, cheerful Kawaii tempo
-        this.stepDuration = 60 / this.tempo / 2; // Eighth notes (approx 0.254s per step)
-        this.scheduleAheadTime = 0.15; // 150ms lookahead for jitter-free rhythm
+        this.tempo = 80; // Gentle, relaxing, slower Kawaii Music Box tempo
+        this.stepDuration = 60 / this.tempo / 2; // Eighth notes (approx 0.375s per step)
+        this.scheduleAheadTime = 0.2; // 200ms lookahead
 
         // Kawaii Music Box Frequencies (Fmaj7 -> G7 -> Em7 -> Am7 Royal Road Loop)
         // Melody notes (0 = rest)
@@ -143,15 +143,15 @@ class SoundEngine {
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(melFreq, time);
 
-            // Very gentle volume (~0.05) so it's charming and soothing
+            // Very gentle volume (~0.045) so it's charming and soothing
             gain.gain.setValueAtTime(0.045, time);
-            gain.gain.exponentialRampToValueAtTime(0.0002, time + 0.38);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.52);
 
             osc.connect(gain);
             gain.connect(this.ctx.destination);
 
             osc.start(time);
-            osc.stop(time + 0.4);
+            osc.stop(time + 0.55);
 
             // Shimmer overtone
             const osc2 = this.ctx.createOscillator();
@@ -160,13 +160,13 @@ class SoundEngine {
             osc2.frequency.setValueAtTime(melFreq * 2, time);
 
             gain2.gain.setValueAtTime(0.015, time);
-            gain2.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
+            gain2.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
 
             osc2.connect(gain2);
             gain2.connect(this.ctx.destination);
 
             osc2.start(time);
-            osc2.stop(time + 0.25);
+            osc2.stop(time + 0.35);
         }
 
         // 2. Gentle Bass Note
@@ -179,13 +179,13 @@ class SoundEngine {
             bOsc.frequency.setValueAtTime(bassFreq, time);
 
             bGain.gain.setValueAtTime(0.038, time);
-            bGain.gain.exponentialRampToValueAtTime(0.0002, time + 0.48);
+            bGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.65);
 
             bOsc.connect(bGain);
             bGain.connect(this.ctx.destination);
 
             bOsc.start(time);
-            bOsc.stop(time + 0.5);
+            bOsc.stop(time + 0.7);
         }
 
         // 3. Soft Arpeggio Accent every 2 steps
@@ -200,13 +200,13 @@ class SoundEngine {
                 hOsc.frequency.setValueAtTime(harmFreq, time);
 
                 hGain.gain.setValueAtTime(0.018, time);
-                hGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
+                hGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.45);
 
                 hOsc.connect(hGain);
                 hGain.connect(this.ctx.destination);
 
                 hOsc.start(time);
-                hOsc.stop(time + 0.34);
+                hOsc.stop(time + 0.48);
             }
         }
     }
