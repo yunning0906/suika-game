@@ -23,8 +23,20 @@ class PhysicsWorld {
         this.comboCount = 0;
         this.lastMergeTime = 0;
         this.comboResetDelay = 1800;
+        this.difficulty = 'normal';
 
         this.initMatter();
+    }
+
+    setDifficulty(mode) {
+        this.difficulty = mode;
+        if (mode === 'easy') {
+            this.dangerMaxTime = 220;
+        } else if (mode === 'hard') {
+            this.dangerMaxTime = 110;
+        } else {
+            this.dangerMaxTime = 160;
+        }
     }
 
     initMatter() {
@@ -95,9 +107,12 @@ class PhysicsWorld {
         const config = FRUIT_TIERS[tier] || FRUIT_TIERS[0];
         const { Bodies, World } = Matter;
 
+        const restitution = this.difficulty === 'hard' ? 0.24 : (this.difficulty === 'easy' ? 0.14 : 0.18);
+        const friction = this.difficulty === 'hard' ? 0.25 : (this.difficulty === 'easy' ? 0.35 : 0.3);
+
         const body = Bodies.circle(x, y, config.radius, {
-            restitution: 0.18,
-            friction: 0.3,
+            restitution: restitution,
+            friction: friction,
             frictionAir: 0.001, // Extremely low air friction for smooth downward fall
             density: 0.002 * (1 + tier * 0.08),
             isStatic: isStatic,

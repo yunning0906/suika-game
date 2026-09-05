@@ -130,6 +130,53 @@ body {
     display: block;
 }
 
+/* Difficulty Selector */
+.difficulty-group {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+}
+
+.diff-btn {
+    flex: 1;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 0;
+    text-align: center;
+    border: 1.6px solid var(--pencil-border);
+    border-radius: 12px;
+    background: #FFFDF8;
+    color: var(--text-black);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: none;
+    letter-spacing: 0.5px;
+}
+
+.diff-btn:hover {
+    transform: translateY(-1px);
+    background: #F4EFE6;
+}
+
+.diff-btn.active[data-diff="easy"] {
+    background: #E8F8F0;
+    border-color: #2D6A4F;
+    color: #1B4D2E;
+}
+
+.diff-btn.active[data-diff="normal"] {
+    background: #FFF3E0;
+    border-color: #D97706;
+    color: #B45309;
+}
+
+.diff-btn.active[data-diff="hard"] {
+    background: #FFE8EC;
+    border-color: #D63031;
+    color: #D63031;
+}
+
 /* Controls Group */
 .controls-group {
     display: flex;

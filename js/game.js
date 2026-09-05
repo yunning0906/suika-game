@@ -11,7 +11,15 @@ class SuikaGame {
         this.canvas.height = 680;
 
         this.score = 0;
-        this.highScore = parseInt(localStorage.getItem('suika_high_score_v1') || '0', 10);
+        
+        // 3 Difficulty Modes (easy, normal, hard)
+        this.difficulty = localStorage.getItem('suika_diff_mode') || 'normal';
+        this.highScores = {
+            easy: parseInt(localStorage.getItem('suika_high_score_easy') || '0', 10),
+            normal: parseInt(localStorage.getItem('suika_high_score_normal') || localStorage.getItem('suika_high_score_v1') || '0', 10),
+            hard: parseInt(localStorage.getItem('suika_high_score_hard') || '0', 10)
+        };
+        this.highScore = this.highScores[this.difficulty] || 0;
 
         this.isGameOver = false;
         this.isPaused = false;
@@ -28,6 +36,7 @@ class SuikaGame {
         this.initUIElements();
         this.initPhysics();
         this.initEventListeners();
+        this.updateDifficultyUI();
         this.updateHUD();
         this.renderNextFruitPreview();
         this.renderEvolutionBar();
@@ -56,6 +65,7 @@ class SuikaGame {
 
         this.restartBtn = document.getElementById('restartBtn');
         this.modalRestartBtn = document.getElementById('modalRestartBtn');
+        this.diffBtns = document.querySelectorAll('.diff-btn');
     }
 
     initPhysics() {
@@ -64,15 +74,55 @@ class SuikaGame {
             (scoreToAdd, combo, fruitConfig) => this.onScoreGained(scoreToAdd, combo, fruitConfig),
             () => this.triggerGameOver()
         );
+        this.physics.setDifficulty(this.difficulty);
+    }
+
+    setDifficulty(mode) {
+        if (this.difficulty === mode) return;
+        this.difficulty = mode;
+        localStorage.setItem('suika_diff_mode', mode);
+        this.physics.setDifficulty(mode);
+        this.highScore = this.highScores[mode] || 0;
+        this.updateDifficultyUI();
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.resetGame();
+    }
+
+    updateDifficultyUI() {
+        if (!this.diffBtns) return;
+        this.diffBtns.forEach(btn => {
+            if (btn.dataset.diff === this.difficulty) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        this.updateHUD();
     }
 
     getRandomDropTier() {
         const rand = Math.random();
-        if (rand < 0.35) return 0;
-        if (rand < 0.65) return 1;
-        if (rand < 0.85) return 2;
-        if (rand < 0.95) return 3;
-        return 4;
+        if (this.difficulty === 'easy') {
+            // EASY: Only smallest 3 fruits (Cherry, Strawberry, Grape)
+            if (rand < 0.45) return 0; // Cherry
+            if (rand < 0.80) return 1; // Strawberry
+            return 2;                  // Grape
+        } else if (this.difficulty === 'hard') {
+            // HARD: Up to Apple (Tier 5) can drop!
+            if (rand < 0.25) return 0; // Cherry
+            if (rand < 0.50) return 1; // Strawberry
+            if (rand < 0.70) return 2; // Grape
+            if (rand < 0.85) return 3; // Dekopon
+            if (rand < 0.94) return 4; // Persimmon
+            return 5;                  // Apple
+        } else {
+            // NORMAL: Classic Suika Game (Tiers 0 - 4)
+            if (rand < 0.35) return 0;
+            if (rand < 0.65) return 1;
+            if (rand < 0.85) return 2;
+            if (rand < 0.95) return 3;
+            return 4;
+        }
     }
 
     initEventListeners() {
@@ -109,6 +159,17 @@ class SuikaGame {
 
         if (this.modalRestartBtn) {
             this.modalRestartBtn.addEventListener('click', () => this.resetGame());
+        }
+
+        if (this.diffBtns) {
+            this.diffBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.dataset.diff;
+                    if (mode) {
+                        this.setDifficulty(mode);
+                    }
+                });
+            });
         }
     }
 
@@ -151,7 +212,9 @@ class SuikaGame {
 
         if (this.score > this.highScore) {
             this.highScore = this.score;
-            localStorage.setItem('suika_high_score_v1', this.highScore.toString());
+            this.highScores[this.difficulty] = this.score;
+            localStorage.setItem('suika_high_score_' + this.difficulty, this.score.toString());
+            localStorage.setItem('suika_high_score_v1', this.score.toString());
         }
 
         this.updateHUD();
