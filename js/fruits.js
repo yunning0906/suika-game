@@ -374,29 +374,41 @@ class FruitRenderer {
                 ctx.restore();
                 break;
 
-            case 10: // 🍉 Watermelon (直接純色球體 + 圓滑波浪黑綠西瓜紋，無外黑框)
+            case 10: // 🍉 Watermelon (立體球面自然波浪西瓜紋)
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(0, 0, r, 0, Math.PI * 2);
                 ctx.clip();
 
-                ctx.strokeStyle = config.stripeColor || '#1F5434';
-                ctx.lineWidth = Math.max(4.0, r * 0.08);
+                ctx.strokeStyle = config.stripeColor || '#1A4D2E';
+                ctx.lineWidth = Math.max(4.2, r * 0.08);
                 ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
 
-                const stripeRatios = [-0.7, -0.35, 0, 0.35, 0.7];
+                // 左右對稱自然球體弧度 (兩端收束於頂底，中央隨球體向外擴張，不遮擋五官)
+                const stripeRatios = [-0.72, -0.42, -0.16, 0.16, 0.42, 0.72];
                 for (let s = 0; s < stripeRatios.length; s++) {
                     const ratio = stripeRatios[s];
-                    const startX = ratio * r * 0.85;
-                    const midCurve = ratio === 0 ? 4 : ratio * 8;
-
                     ctx.beginPath();
-                    ctx.moveTo(startX * 0.8, -r * 0.98);
-                    ctx.quadraticCurveTo(startX + midCurve, 0, startX * 0.8, r * 0.98);
+                    const steps = 18;
+                    for (let step = 0; step <= steps; step++) {
+                        const t = step / steps;
+                        const y = -r * 0.94 + t * (r * 1.88);
+                        const ry = Math.sqrt(Math.max(0, r * r - y * y));
+                        const wave = Math.sin(t * Math.PI * 3.5 + ratio * 2.5) * (r * 0.045);
+                        const x = ratio * ry + wave;
+
+                        if (step === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
                     ctx.stroke();
                 }
                 ctx.restore();
 
+                // 頂部小果蒂
                 ctx.save();
                 ctx.strokeStyle = '#5D4037';
                 ctx.lineWidth = Math.max(2.8, r * 0.065);
