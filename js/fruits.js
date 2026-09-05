@@ -1,7 +1,10 @@
 /**
- * Colored Pencil (色鉛筆手繪風) Fruit Definitions & Dynamic Vector Renderer
- * Clean minimalist aesthetic: No strawberry seeds, no blush, smaller cute black dot eyes.
+ * Colored Pencil / Minimalist Fruit Definitions & Dynamic Vector Renderer
+ * Clean aesthetic: Borderless fruits (pure color, no circular black outline),
+ * and dark olive/emerald green leaves (like orange leaves) on all fruits.
  */
+
+const DARK_LEAF_COLOR = '#1E4D2B'; // 橘子墨綠色葉子
 
 const FRUIT_TIERS = [
     {
@@ -11,6 +14,7 @@ const FRUIT_TIERS = [
         score: 2,
         color: '#FF6B7A',
         accentColor: '#FFA3AC',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#5A3D31',
         stroke: '#5A3D31'
     },
@@ -21,7 +25,7 @@ const FRUIT_TIERS = [
         score: 4,
         color: '#FF5E6C',
         accentColor: '#FF9EAA',
-        leafColor: '#7BC676',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#5A3D31',
         stroke: '#5A3D31'
     },
@@ -32,7 +36,7 @@ const FRUIT_TIERS = [
         score: 8,
         color: '#A57BC9',
         accentColor: '#CFB5EB',
-        leafColor: '#7BC676',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#4A3245',
         stroke: '#4A3245'
     },
@@ -43,7 +47,7 @@ const FRUIT_TIERS = [
         score: 16,
         color: '#FFA74F',
         accentColor: '#FFCE85',
-        leafColor: '#7BC676',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#5A3E28',
         stroke: '#5A3E28'
     },
@@ -54,7 +58,7 @@ const FRUIT_TIERS = [
         score: 32,
         color: '#FF7657',
         accentColor: '#FFAE96',
-        calyxColor: '#5EA882',
+        calyxColor: DARK_LEAF_COLOR,
         pencilOutline: '#593424',
         stroke: '#593424'
     },
@@ -66,7 +70,7 @@ const FRUIT_TIERS = [
         color: '#EE5A5A',
         accentColor: '#FF9696',
         stemColor: '#6B4C35',
-        leafColor: '#66BB6A',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#4A2A2A',
         stroke: '#4A2A2A'
     },
@@ -78,7 +82,7 @@ const FRUIT_TIERS = [
         color: '#C6E377',
         accentColor: '#E4F4A5',
         stemColor: '#6B4C35',
-        leafColor: '#4CAF50',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#475225',
         stroke: '#475225'
     },
@@ -89,7 +93,7 @@ const FRUIT_TIERS = [
         score: 256,
         color: '#FFB2C9',
         accentColor: '#FFE0EB',
-        leafColor: '#66BB6A',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#633B48',
         stroke: '#633B48'
     },
@@ -100,7 +104,7 @@ const FRUIT_TIERS = [
         score: 512,
         color: '#FCD858',
         accentColor: '#FFF09E',
-        leafColor: '#81C784',
+        leafColor: DARK_LEAF_COLOR,
         pencilOutline: '#5E4C1D',
         stroke: '#5E4C1D'
     },
@@ -138,7 +142,7 @@ class FruitRenderer {
     }
 
     /**
-     * Draw fruit in colored pencil style
+     * Draw fruit: Borderless pure color body, dark green leaves, cute black dot eyes
      */
     drawFruit(ctx, fruitBody, previewMode = false) {
         const tier = fruitBody.tier !== undefined ? fruitBody.tier : 0;
@@ -170,111 +174,85 @@ class FruitRenderer {
         ctx.rotate(angle);
         ctx.scale(scaleX, scaleY);
 
-        // 1. Base Colored-Pencil Body
+        // 1. Pure Borderless Color Body (無黑邊，直接是顏色)
         this.drawPencilBody(ctx, config, radius);
 
-        // 2. Fruit Features (Leaves, Stems, Stripes)
+        // 2. Fruit Features (Leaves in dark green, Stems, Stripes)
         this.drawPencilFeatures(ctx, config, radius);
 
-        // 3. Face: Smaller black dot eyes, no blush
+        // 3. Face: Small black dot eyes, no blush
         this.drawMatteFace(ctx, config, radius, fruitBody.isBlinking, tier);
 
         ctx.restore();
     }
 
     drawPencilBody(ctx, config, r) {
-        // Pure clean pastel fill
+        // 刪除圓形黑線，無邊框，直接純色填充
         ctx.fillStyle = config.color;
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.fill();
-
-        // Clean uniform hand-drawn outline
-        ctx.save();
-        ctx.strokeStyle = config.pencilOutline;
-        ctx.lineWidth = Math.max(2.0, r * 0.045);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
     }
 
     drawPencilFeatures(ctx, config, r) {
-        const outlineColor = config.pencilOutline;
-
         switch (config.tier) {
             case 0: // 🍒 Cherry
                 ctx.save();
                 ctx.strokeStyle = '#524338';
-                ctx.lineWidth = Math.max(2.2, r * 0.12);
+                ctx.lineWidth = Math.max(2.0, r * 0.11);
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.85);
                 ctx.quadraticCurveTo(r * 0.35, -r * 1.45, r * 0.25, -r * 1.65);
                 ctx.stroke();
 
-                ctx.fillStyle = '#8BC34A';
-                ctx.strokeStyle = '#524338';
-                ctx.lineWidth = 1.5;
+                // 橘子墨綠色葉子 (無黑邊)
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(r * 0.3, -r * 1.55, r * 0.32, r * 0.16, -Math.PI / 6, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
-            case 1: // 🍓 Strawberry (草變小，點點已刪除)
+            case 1: // 🍓 Strawberry (草變小，無點點，橘子墨綠色葉子，無黑邊)
                 ctx.save();
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.2;
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 for (let i = -1; i <= 1; i++) {
                     ctx.beginPath();
                     ctx.ellipse(i * (r * 0.22), -r * 0.95, r * 0.09, r * 0.14, (i * Math.PI) / 10, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.stroke();
                 }
                 ctx.restore();
                 break;
 
             case 2: // 🍇 Grape
                 ctx.save();
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.5;
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(r * 0.2, -r * 0.95, r * 0.24, r * 0.13, -Math.PI / 4, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
             case 3: // 🍊 Dekopon
                 ctx.save();
+                // 頂部凸起無黑邊，直接是果肉顏色
                 ctx.fillStyle = config.color;
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.arc(0, -r * 0.92, r * 0.22, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
 
-                ctx.fillStyle = '#81C784';
+                // 橘子墨綠色葉子
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(r * 0.2, -r * 1.05, r * 0.22, r * 0.12, Math.PI / 6, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
-            case 4: // 🍅 Persimmon
+            case 4: // 🍅 Persimmon (蒂頭改為橘子墨綠色，無黑邊)
                 ctx.save();
-                ctx.fillStyle = '#5EA882';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.8;
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 for (let i = 0; i < 4; i++) {
                     ctx.beginPath();
                     ctx.ellipse(
@@ -287,7 +265,6 @@ class FruitRenderer {
                         Math.PI * 2
                     );
                     ctx.fill();
-                    ctx.stroke();
                 }
                 ctx.restore();
                 break;
@@ -295,66 +272,58 @@ class FruitRenderer {
             case 5: // 🍎 Apple
                 ctx.save();
                 ctx.strokeStyle = '#5D4037';
-                ctx.lineWidth = Math.max(2.8, r * 0.08);
+                ctx.lineWidth = Math.max(2.6, r * 0.08);
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.88);
                 ctx.quadraticCurveTo(r * 0.1, -r * 1.15, r * 0.2, -r * 1.25);
                 ctx.stroke();
 
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.8;
+                // 橘子墨綠色葉子
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(r * 0.35, -r * 1.15, r * 0.25, r * 0.13, -Math.PI / 4, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
             case 6: // 🍐 Pear
                 ctx.save();
                 ctx.strokeStyle = '#5D4037';
-                ctx.lineWidth = Math.max(2.8, r * 0.07);
+                ctx.lineWidth = Math.max(2.6, r * 0.07);
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.9);
                 ctx.lineTo(r * 0.1, -r * 1.18);
                 ctx.stroke();
 
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.8;
+                // 橘子墨綠色葉子
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(r * 0.25, -r * 1.1, r * 0.2, r * 0.1, Math.PI / 5, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
             case 7: // 🍑 Peach
                 ctx.save();
-                ctx.strokeStyle = 'rgba(163, 75, 105, 0.45)';
-                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = 'rgba(163, 75, 105, 0.4)';
+                ctx.lineWidth = 2.2;
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.95);
                 ctx.quadraticCurveTo(0, -r * 0.3, 0, 0);
                 ctx.stroke();
 
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 1.8;
+                // 橘子墨綠色葉子
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 ctx.beginPath();
                 ctx.ellipse(-r * 0.25, -r * 0.95, r * 0.28, r * 0.13, -Math.PI / 5, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
                 ctx.restore();
                 break;
 
-            case 8: // 🍍 Pineapple
+            case 8: // 🍍 Pineapple (頂部冠芽葉子全改為橘子墨綠色)
                 ctx.save();
-                ctx.fillStyle = '#81C784';
-                ctx.strokeStyle = outlineColor;
-                ctx.lineWidth = 2;
+                ctx.fillStyle = DARK_LEAF_COLOR;
                 const leafAngles = [-0.42, -0.2, 0, 0.2, 0.42];
                 for (const la of leafAngles) {
                     ctx.save();
@@ -365,12 +334,12 @@ class FruitRenderer {
                     ctx.lineTo(r * 0.12, -r * 0.85);
                     ctx.closePath();
                     ctx.fill();
-                    ctx.stroke();
                     ctx.restore();
                 }
 
-                ctx.strokeStyle = 'rgba(150, 95, 25, 0.35)';
-                ctx.lineWidth = 2;
+                // 鳳梨表面菱形紋路
+                ctx.strokeStyle = 'rgba(150, 95, 25, 0.3)';
+                ctx.lineWidth = 1.8;
                 ctx.beginPath();
                 for (let d = -0.5; d <= 0.5; d += 0.35) {
                     ctx.moveTo(-r * 0.7, d * r);
@@ -394,7 +363,7 @@ class FruitRenderer {
                 ctx.stroke();
 
                 ctx.strokeStyle = '#5D4037';
-                ctx.lineWidth = 3.5;
+                ctx.lineWidth = 3.2;
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.92);
@@ -405,10 +374,10 @@ class FruitRenderer {
                 ctx.restore();
                 break;
 
-            case 10: // 🍉 Watermelon
+            case 10: // 🍉 Watermelon (直接純色球體 + 圓滑波浪黑綠西瓜紋，無外黑框)
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(0, 0, r - 1.5, 0, Math.PI * 2);
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
                 ctx.clip();
 
                 ctx.strokeStyle = config.stripeColor || '#1F5434';
@@ -430,7 +399,7 @@ class FruitRenderer {
 
                 ctx.save();
                 ctx.strokeStyle = '#5D4037';
-                ctx.lineWidth = Math.max(3.0, r * 0.065);
+                ctx.lineWidth = Math.max(2.8, r * 0.065);
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(0, -r * 0.92);
@@ -442,19 +411,16 @@ class FruitRenderer {
     }
 
     /**
-     * Draw Face: Smaller solid black dot eyes, NO blush (完全刪除腮紅，眼睛更小巧)
+     * Draw Face: Small solid black dot eyes, hand-drawn smile, no blush
      */
     drawMatteFace(ctx, config, r, isBlinking, tier) {
         ctx.save();
         const eyeOffsetX = r * 0.32;
         const eyeOffsetY = r * 0.06;
-        // Smaller delicate eyes: scaled down
         const eyeRadius = Math.max(1.6, r * 0.052);
         const pencilLead = '#222222';
 
-        // 1. NO BLUSH (已刪除腮紅)
-
-        // 2. Eyes: Smaller Solid Black Dots
+        // 1. Eyes: Solid Black Dots
         if (isBlinking) {
             ctx.strokeStyle = pencilLead;
             ctx.lineWidth = Math.max(1.5, r * 0.045);
@@ -472,7 +438,7 @@ class FruitRenderer {
             ctx.fill();
         }
 
-        // 3. Cute Hand-drawn Smile
+        // 2. Hand-drawn Smile
         ctx.strokeStyle = pencilLead;
         ctx.lineWidth = Math.max(1.6, r * 0.048);
         ctx.lineCap = 'round';
